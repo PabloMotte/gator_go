@@ -64,5 +64,12 @@ func defineCommands() map[string]command_handlers {
 			},
 			handler: handlerLogin,
 		},
+		"register": {
+			cmd: command{
+				name: "register",
+				arguments: []string{"username",},
+			},
+			handler: handlerRegister,
+		},
 	}
 }
