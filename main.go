@@ -2,23 +2,47 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"github.com/pablomotte/gator_go/internal/config"
 )
 
+type state struct {
+	config *config.Config
+}
+
 func main() {
-	fmt.Println("Hello, World!")
-	config, err := config.Read()
+	new_config, err := config.Read()
 	if err != nil {
 		fmt.Println("Error reading config", err)
-	} else {
-		print_config(config)
+		os.Exit(1)
 	}
-	// config.SetUser("paul")
-	// print_config(config)
-	// config.SetUser("bob")
-	// print_config(config)
-	// config.SetUser("")
-	// print_config(config)
+	curr_state := state{
+		config: &new_config,
+	}
+	curr_commands := createCommands(curr_state)
+	num_args := len(os.Args)
+	if num_args < 2 {
+		fmt.Println("Required: Command name")
+		os.Exit(1)
+	}
+	var cmd command
+	cmd_name := os.Args[1]
+	if num_args < 3 {
+		cmd = command{
+			name: cmd_name,
+			arguments: []string{},
+		}
+	} else {
+		cmd = command{
+			name: cmd_name,
+			arguments: os.Args[2:],
+		}
+	}
+	err = curr_commands.run(&curr_state, cmd)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
 }
 
 func print_config(cfg config.Config) {
@@ -26,3 +50,4 @@ func print_config(cfg config.Config) {
 		fmt.Println(k, v)
 	}
 }
+

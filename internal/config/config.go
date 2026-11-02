@@ -47,13 +47,14 @@ func Read() (Config, error) {
 	
 }
 
-func (c *Config) SetUser(user string) {
+func (c *Config) SetUser(user string) error {
 	c.CurrentUserName = user
 	err := write(*c)
 	if err != nil {
 		err2 := fmt.Errorf("Error writing config to file: %w", err)
-		fmt.Println(err2)
+		return err2
 	}
+	return nil
 }
 
 func getConfigFilePath() (string, error) {
