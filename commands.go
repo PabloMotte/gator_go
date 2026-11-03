@@ -92,5 +92,19 @@ func defineCommands() map[string]command_handlers {
 			},
 			handler: handlerAgg,
 		},
+		"addfeed": {
+			cmd: command{
+				name: "addfeed",
+				arguments: []string{"name", "feedURL",},
+			},
+			handler: handlerAddFeed,
+		},
+		"feeds": {
+			cmd: command{
+				name: "feeds",
+				arguments: []string{},
+			},
+			handler: handlerFeeds,
+		},
 	}
 }

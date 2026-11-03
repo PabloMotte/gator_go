@@ -30,6 +30,7 @@ func handlerLogin(s *state, cmd command) error {
 	fmt.Printf("Current user set to %q\n", s.config.CurrentUserName)
 	return nil
 }
+
 func handlerUsers(s *state, cmd command) error {
 	if len(cmd.arguments) >= 1 {
 		return fmt.Errorf("The users command expects no parameters")
