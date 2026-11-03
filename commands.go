@@ -71,5 +71,26 @@ func defineCommands() map[string]command_handlers {
 			},
 			handler: handlerRegister,
 		},
+		"reset": {
+			cmd: command{
+				name: "reset",
+				arguments: []string{},
+			},
+			handler: handlerReset,
+		},
+		"users": {
+			cmd: command{
+				name: "users",
+				arguments: []string{},
+			},
+			handler: handlerUsers,
+		},
+		"agg": {
+			cmd: command{
+				name: "agg",
+				arguments: []string{"feedURL",},
+			},
+			handler: handlerAgg,
+		},
 	}
 }

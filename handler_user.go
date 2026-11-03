@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
-	"github.com/pablomotte/gator_go/internal/database"
+
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/lib/pq/pqerror"
-	"database/sql"
+	"github.com/pablomotte/gator_go/internal/database"
 )
 
 func handlerLogin(s *state, cmd command) error {
@@ -29,16 +30,57 @@ func handlerLogin(s *state, cmd command) error {
 	fmt.Printf("Current user set to %q\n", s.config.CurrentUserName)
 	return nil
 }
+func handlerUsers(s *state, cmd command) error {
+	if len(cmd.arguments) >= 1 {
+		return fmt.Errorf("The users command expects no parameters")
+	}
+	users, err := s.db.GetAllUsers(context.Background())
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("no users exist")
+		}
+		return err
+	}
+	if len(users) == 0 {
+		fmt.Printf("No users registered\n")
+	} else {
+		for _, v := range users {
+			tag := ""
+			if s.config.CurrentUserName == v.Name {
+				tag = " (current)"
+			}
+			fmt.Printf("* %s%s\n", v.Name, tag)
+		}
+	}
+	return nil
+}
+
+func handlerReset(s *state, cmd command) error {
+	if len(cmd.arguments) >= 1 {
+		return fmt.Errorf("The reset command expects no parameters")
+	}
+	if err := s.db.DeleteAllUsers(context.Background()); err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("no records found")
+		}
+		return err
+	}
+	if err := s.config.SetUser(""); err != nil {
+		return err
+	}
+	fmt.Printf("Database reset\n")
+	return nil
+}
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) < 1 {
 		return fmt.Errorf("The register command expects a username")
 	}
 	crt_user := database.CreateUserParams{
-		ID: uuid.New(),
+		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name: cmd.arguments[0],
+		Name:      cmd.arguments[0],
 	}
 	user, err := s.db.CreateUser(context.Background(), crt_user)
 	if err != nil {

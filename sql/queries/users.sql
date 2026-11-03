@@ -8,6 +8,11 @@ VALUES (
 )
 RETURNING *;
 
+-- name: GetAllUsers :many
+SELECT id, created_at, updated_at, name
+FROM users
+;
+
 -- name: GetUser :one
 SELECT id, created_at, updated_at, name
 FROM users
@@ -18,4 +23,9 @@ WHERE name IN ($1)
 SELECT id, created_at, updated_at, name
 FROM users
 WHERE id IN ($1)
+;
+
+-- name: DeleteAllUsers :exec
+DELETE
+FROM users
 ;
