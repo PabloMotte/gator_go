@@ -56,8 +56,9 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 }
 
 const getAllFeeds = `-- name: GetAllFeeds :many
-SELECT feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feeds.user_id, users.name
-FROM feeds JOIN users on feeds.user_id = users.id
+SELECT feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feeds.user_id, users.name as user_name
+FROM feeds 
+JOIN users on feeds.user_id = users.id
 `
 
 type GetAllFeedsRow struct {
@@ -67,7 +68,7 @@ type GetAllFeedsRow struct {
 	Name      string
 	Url       string
 	UserID    uuid.UUID
-	Name_2    string
+	UserName  string
 }
 
 func (q *Queries) GetAllFeeds(ctx context.Context) ([]GetAllFeedsRow, error) {
@@ -86,7 +87,7 @@ func (q *Queries) GetAllFeeds(ctx context.Context) ([]GetAllFeedsRow, error) {
 			&i.Name,
 			&i.Url,
 			&i.UserID,
-			&i.Name_2,
+			&i.UserName,
 		); err != nil {
 			return nil, err
 		}
@@ -99,4 +100,68 @@ func (q *Queries) GetAllFeeds(ctx context.Context) ([]GetAllFeedsRow, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getFeed = `-- name: GetFeed :one
+SELECT feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feeds.user_id, users.name as user_name
+FROM feeds 
+JOIN users on feeds.user_id = users.id
+WHERE feeds.url in ($1)
+`
+
+type GetFeedRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	Url       string
+	UserID    uuid.UUID
+	UserName  string
+}
+
+func (q *Queries) GetFeed(ctx context.Context, url string) (GetFeedRow, error) {
+	row := q.db.QueryRowContext(ctx, getFeed, url)
+	var i GetFeedRow
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+		&i.UserName,
+	)
+	return i, err
+}
+
+const getFeedByID = `-- name: GetFeedByID :one
+SELECT feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feeds.user_id, users.name as user_name
+FROM feeds 
+JOIN users on feeds.user_id = users.id
+WHERE feeds.id in ($1)
+`
+
+type GetFeedByIDRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	Url       string
+	UserID    uuid.UUID
+	UserName  string
+}
+
+func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (GetFeedByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getFeedByID, id)
+	var i GetFeedByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+		&i.UserName,
+	)
+	return i, err
 }

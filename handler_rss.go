@@ -62,7 +62,7 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 func handlerAgg(_ *state, cmd command) error {
 	override_url := "https://www.wagslane.dev/index.xml"
 	// if len(cmd.arguments) < 1 {
-	// 	return fmt.Errorf("The agg command expects a URL")
+	// 	return fmt.Errorf("The %s command expects a URL", cmd.Name)
 	// }
 	// sel_url := cmd.arguments[0]
 	sel_url := override_url

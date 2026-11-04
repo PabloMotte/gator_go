@@ -14,7 +14,7 @@ import (
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.arguments) < 1 {
-		return fmt.Errorf("The login command expects a username")
+		return fmt.Errorf("The %s command expects a username", cmd.name)
 	}
 	sel_user := cmd.arguments[0]
 	_, err := s.db.GetUser(context.Background(), sel_user)
@@ -33,7 +33,7 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerUsers(s *state, cmd command) error {
 	if len(cmd.arguments) >= 1 {
-		return fmt.Errorf("The users command expects no parameters")
+		return fmt.Errorf("The %s command expects no parameters", cmd.name)
 	}
 	users, err := s.db.GetAllUsers(context.Background())
 	if err != nil {
@@ -58,7 +58,7 @@ func handlerUsers(s *state, cmd command) error {
 
 func handlerReset(s *state, cmd command) error {
 	if len(cmd.arguments) >= 1 {
-		return fmt.Errorf("The reset command expects no parameters")
+		return fmt.Errorf("The %s command expects no parameters", cmd.name)
 	}
 	if err := s.db.DeleteAllUsers(context.Background()); err != nil {
 		if err == sql.ErrNoRows {
@@ -75,7 +75,7 @@ func handlerReset(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) < 1 {
-		return fmt.Errorf("The register command expects a username")
+		return fmt.Errorf("The %s command expects a username", cmd.name)
 	}
 	crt_user := database.CreateUserParams{
 		ID:        uuid.New(),

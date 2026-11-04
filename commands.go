@@ -5,7 +5,7 @@ import (
 )
 
 type command struct {
-	name string
+	name      string
 	arguments []string
 }
 type gator_function func(*state, command) error
@@ -13,7 +13,7 @@ type commands struct {
 	cmd_map map[string]gator_function
 }
 type command_handlers struct {
-	cmd command
+	cmd     command
 	handler gator_function
 }
 
@@ -59,52 +59,66 @@ func defineCommands() map[string]command_handlers {
 	return map[string]command_handlers{
 		"login": {
 			cmd: command{
-				name: "login",
-				arguments: []string{"username",},
+				name:      "login",
+				arguments: []string{"username"},
 			},
 			handler: handlerLogin,
 		},
 		"register": {
 			cmd: command{
-				name: "register",
-				arguments: []string{"username",},
+				name:      "register",
+				arguments: []string{"username"},
 			},
 			handler: handlerRegister,
 		},
 		"reset": {
 			cmd: command{
-				name: "reset",
+				name:      "reset",
 				arguments: []string{},
 			},
 			handler: handlerReset,
 		},
 		"users": {
 			cmd: command{
-				name: "users",
+				name:      "users",
 				arguments: []string{},
 			},
 			handler: handlerUsers,
 		},
 		"agg": {
 			cmd: command{
-				name: "agg",
-				arguments: []string{"feedURL",},
+				name:      "agg",
+				arguments: []string{"feedURL"},
 			},
 			handler: handlerAgg,
 		},
 		"addfeed": {
 			cmd: command{
-				name: "addfeed",
-				arguments: []string{"name", "feedURL",},
+				name:      "addfeed",
+				arguments: []string{"name", "feedURL"},
 			},
 			handler: handlerAddFeed,
 		},
 		"feeds": {
 			cmd: command{
-				name: "feeds",
+				name:      "feeds",
 				arguments: []string{},
 			},
 			handler: handlerFeeds,
+		},
+		"follow": {
+			cmd: command{
+				name:      "follow",
+				arguments: []string{"feedURL"},
+			},
+			handler: handlerAddFollow,
+		},
+		"following": {
+			cmd: command{
+				name:      "following",
+				arguments: []string{"feedURL"},
+			},
+			handler: handlerListFollowing,
 		},
 	}
 }
