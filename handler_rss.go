@@ -59,17 +59,22 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	return rss_feed, nil
 }
 
-func handlerAgg(_ *state, cmd command) error {
-	override_url := "https://www.wagslane.dev/index.xml"
-	// if len(cmd.arguments) < 1 {
-	// 	return fmt.Errorf("The %s command expects a URL", cmd.Name)
-	// }
-	// sel_url := cmd.arguments[0]
-	sel_url := override_url
-	rss_feed, err := fetchFeed(context.Background(), sel_url)
+func handlerAgg(s *state, cmd command) error {
+	// override_url := "https://www.wagslane.dev/index.xml"
+	if len(cmd.arguments) < 1 {
+		return fmt.Errorf("The %s command expects a duration between refreshes", cmd.name)
+	}
+	timeBetweenRequests := string(cmd.arguments[0])
+	time_duration, err := time.ParseDuration(timeBetweenRequests)
 	if err != nil {
 		return err
 	}
-	fmt.Println(rss_feed)
-	return nil
+	fmt.Printf("Collecting feeds every %s (CTRL-C to end)\n", timeBetweenRequests)
+	ticker := time.NewTicker(time_duration)
+	for ; ; <-ticker.C {
+		if err := scrapeFeeds(s, cmd); err != nil {
+			return err
+		}
+	}
+	// return nil
 }

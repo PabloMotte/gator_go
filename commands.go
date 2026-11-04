@@ -88,7 +88,7 @@ func defineCommands() map[string]command_handlers {
 		"agg": {
 			cmd: command{
 				name:      "agg",
-				arguments: []string{"feedURL"},
+				arguments: []string{"timeBetweenRequests"},
 			},
 			handler: handlerAgg,
 		},
@@ -97,7 +97,7 @@ func defineCommands() map[string]command_handlers {
 				name:      "addfeed",
 				arguments: []string{"name", "feedURL"},
 			},
-			handler: handlerAddFeed,
+			handler: middlewareLoggedIn(handlerAddFeed),
 		},
 		"feeds": {
 			cmd: command{
@@ -111,14 +111,21 @@ func defineCommands() map[string]command_handlers {
 				name:      "follow",
 				arguments: []string{"feedURL"},
 			},
-			handler: handlerAddFollow,
+			handler: middlewareLoggedIn(handlerAddFollow),
+		},
+		"unfollow": {
+			cmd: command{
+				name:      "unfollow",
+				arguments: []string{"feedURL"},
+			},
+			handler: middlewareLoggedIn(handlerDeleteFollow),
 		},
 		"following": {
 			cmd: command{
 				name:      "following",
 				arguments: []string{"feedURL"},
 			},
-			handler: handlerListFollowing,
+			handler: middlewareLoggedIn(handlerListFollowing),
 		},
 	}
 }
