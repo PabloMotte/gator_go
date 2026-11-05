@@ -4,16 +4,18 @@ RSS feed aggregator in Go
 
 ## Requirements
 
-The following is required to run the aggregator:
+The following is required to install the aggregator:
 
 - [Go](https://go.dev/) - Cilck the link if you don't already have it installed
 - [PostgreSQL](https://www.postgresql.org/) - same here
+  
+Go is not really required once you've installed the tool, but why uninstall it?
 
-If you are using Windows, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+If you are using Windows, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) as that is what I used.
   
 ## Installation
 
-Clone the repo, then use `go install` and type `gator_go` to get started
+Clone the repo, then use `go install` from the repo root and you can type `gator_go` to use the tool.
 
 ### List Users
 
@@ -67,3 +69,15 @@ Developed using [Go](https://go.dev/) on [WSL](https://en.wikipedia.org/wiki/Win
 - DB work through psql, [SQLC](https://sqlc.dev/) and [Goose](https://github.com/pressly/goose)
 - - goose version: v3.29.0
 - - SQLC version: v1.31.1
+
+### Further Development
+
+- Add instructions for building database to this README.md
+- Add sorting and filtering options to the browse command
+- Add pagination to the browse command
+- Add concurrency to the agg command so that it can fetch more frequently
+- Add a search command that allows for fuzzy searching of posts
+- Add bookmarking or liking posts
+- Add a TUI that allows you to select a post in the terminal and view it in a more readable format (either in the terminal or open in a browser)
+- Add an HTTP API (and authentication/authorization) that allows other users to interact with the service remotely
+- Write a service manager that keeps the agg command running in the background and restarts it if it crashes
