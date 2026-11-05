@@ -127,5 +127,12 @@ func defineCommands() map[string]command_handlers {
 			},
 			handler: middlewareLoggedIn(handlerListFollowing),
 		},
+		"browse": {
+			cmd: command{
+				name:      "browse",
+				arguments: []string{"limit", "offset"},
+			},
+			handler: middlewareLoggedIn(handlerPostBrowse),
+		},
 	}
 }

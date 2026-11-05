@@ -139,6 +139,7 @@ func handlerFeeds(s *state, cmd command) error {
 }
 
 func scrapeFeeds(s *state, cmd command) error {
+	display := false
 	feed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -158,21 +159,70 @@ func scrapeFeeds(s *state, cmd command) error {
 	if err := s.db.MarkFeedFetched(context.Background(), feed.ID); err != nil {
 		return err
 	}
-	fmt.Printf("Feed %q (%s) fetched", feed.Name, feed.Url)
-	if !no_rows {
-		no_rows = true // flip flag in case SQL didn't return "no rows" error
-		w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-		for k, v := range feed_data.Channel.Item {
-			if no_rows {
-				fmt.Printf(":\n")
-				no_rows = false
+	if display {
+		fmt.Printf("Feed %q (%s) fetched", feed.Name, feed.Url)
+		if !no_rows {
+			no_rows = true // flip flag in case SQL didn't return "no rows" error
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+			for k, v := range feed_data.Channel.Item {
+				if no_rows {
+					fmt.Printf(":\n")
+					no_rows = false
+				}
+				fmt.Printf("- %d\t%s\t\n", k+1, v.Title)
 			}
-			fmt.Printf("- %d\t%s\t\n", k+1, v.Title)
+			w.Flush()
 		}
-		w.Flush()
-	}
-	if no_rows {
-		fmt.Printf(", but nothing to display\n")
+		if no_rows {
+			fmt.Printf(", but nothing to display\n")
+		}
+	} else {
+		if !no_rows {
+			fmt.Printf("Feed %q (%s) fetched (%v)\n", feed.Name, feed.Url, time.Now().Format(time.UnixDate))
+			no_rows = true // flip flag in case SQL didn't return "no rows" error
+			for _, v := range feed_data.Channel.Item {
+				if no_rows {
+					no_rows = false
+				}
+				post_exists := true
+				_, err := s.db.GetPostByURL(context.Background(), feed.Url)
+				if err != nil {
+					if err != sql.ErrNoRows {
+						return err
+					}
+					post_exists = false
+				}
+				if !post_exists {
+					publishedAt := sql.NullTime{}
+					if t, err := time.Parse(time.RFC1123Z, v.PubDate); err == nil {
+						publishedAt = sql.NullTime{
+							Time:  t,
+							Valid: true,
+						}
+					}
+					post_data := database.AddPostParams{
+						ID:        uuid.New(),
+						CreatedAt: time.Now(),
+						UpdatedAt: time.Now(),
+						Title:     v.Title,
+						Url:       v.Link,
+						Description: sql.NullString{
+							String: v.Description,
+							Valid:  true,
+						},
+						PublishedAt: publishedAt,
+						FeedID:      feed.ID,
+					}
+					if _, err := s.db.AddPost(context.Background(), post_data); err != nil {
+						pqErr := pq.As(err, pqerror.UniqueViolation)
+						if pqErr == nil {
+							// if not a UniqueViolation...
+							return err
+						}
+					}
+				}
+			}
+		}
 	}
 	return nil
 }

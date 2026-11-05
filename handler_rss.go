@@ -2,10 +2,16 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
+	"os"
+	"strconv"
+	"text/tabwriter"
 	"time"
+
+	"github.com/pablomotte/gator_go/internal/database"
 )
 
 type RSSFeed struct {
@@ -77,4 +83,50 @@ func handlerAgg(s *state, cmd command) error {
 		}
 	}
 	// return nil
+}
+
+func handlerPostBrowse(s *state, cmd command, user database.User) error {
+	var limit int32
+	var offset int32
+	limit = 2
+	offset = 0
+	if len(cmd.arguments) < 1 {
+		if len(cmd.arguments) < -1 { // optional parameter(s), so inhibit error message
+			return fmt.Errorf("The %s command expects a limit of posts to view", cmd.name)
+		}
+	} else if len(cmd.arguments) >= 1 {
+		limit_c, err := strconv.Atoi(cmd.arguments[0])
+		if err != nil {
+			limit = 2
+		} else {
+			limit = int32(limit_c)
+		}
+		if len(cmd.arguments) > 1 {
+			offset_c, err := strconv.Atoi(cmd.arguments[1])
+			if err != nil {
+				offset = 2
+			} else {
+				offset = int32(offset_c)
+			}
+		}
+	}
+	get_post_params := database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  limit,
+		Offset: offset,
+	}
+	posts, err := s.db.GetPostsForUser(context.Background(), get_post_params)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		return err
+	}
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+	for k, v := range posts {
+		fmt.Printf("- %3d\t%s\t\n", k+1, v.Title)
+		fmt.Printf("     \t%s\t(%v)\t\n", v.Url, v.PublishedAt.Time.Format(time.UnixDate))
+	}
+	w.Flush()
+	return nil
 }
